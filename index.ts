@@ -105,6 +105,7 @@ async function generateHtml(): Promise<string> {
     Sequence: '#10b981',
     Class: '#f59e0b',
     ER: '#ef4444',
+    'XY Chart': '#f97316',
     'Theme Showcase': '#06b6d4',
   }
 
@@ -114,6 +115,7 @@ async function generateHtml(): Promise<string> {
     'Sequence': 'Sequence: ',
     'Class': 'Class: ',
     'ER': 'ER: ',
+    'XY Chart': 'XY: ',
     'Theme Showcase': 'Theme: ',
   }
 
@@ -1298,6 +1300,8 @@ ${bundleJs}
   var renderMermaid = window.__mermaid.renderMermaidSVGAsync;
   var renderMermaidAscii = window.__mermaid.renderMermaidASCII;
   var diagramColorsToAsciiTheme = window.__mermaid.diagramColorsToAsciiTheme;
+  var getSeriesColor = window.__mermaid.getSeriesColor;
+  var CHART_ACCENT_FALLBACK = window.__mermaid.CHART_ACCENT_FALLBACK;
 
   var totalTimingEl = document.getElementById('total-timing');
 
@@ -1403,6 +1407,15 @@ ${bundleJs}
           if (theme[prop]) svgEl.style.setProperty('--' + prop, theme[prop]);
           else svgEl.style.removeProperty('--' + prop);
         }
+        // Recompute xychart series color vars from the new accent
+        var maxColor = parseInt(svgEl.getAttribute('data-xychart-colors') || '-1', 10);
+        if (maxColor >= 0) {
+          var accent = theme.accent || CHART_ACCENT_FALLBACK;
+          svgEl.style.setProperty('--xychart-color-0', accent);
+          for (var ci = 1; ci <= maxColor; ci++) {
+            svgEl.style.setProperty('--xychart-color-' + ci, getSeriesColor(ci, accent, theme.bg));
+          }
+        }
       } else {
         // Restore original inline style from initial render
         if (originalSvgStyles[j] !== undefined) {
@@ -1429,7 +1442,7 @@ ${bundleJs}
     // 4. Re-render ASCII panels with new theme colors
     var asciiTheme = theme ? diagramColorsToAsciiTheme(theme) : null;
     for (var j = 0; j < samples.length; j++) {
-      var asciiEl = document.getElementById('ascii-' + (j + 1));
+      var asciiEl = document.getElementById('ascii-' + j);
       if (!asciiEl) continue;
       try {
         asciiEl.innerHTML = renderMermaidAscii(
@@ -1637,6 +1650,15 @@ ${bundleJs}
             if (th[enrichment[k]]) svgEl.style.setProperty('--' + enrichment[k], th[enrichment[k]]);
             else svgEl.style.removeProperty('--' + enrichment[k]);
           }
+          // Recompute xychart series color vars from the saved theme's accent
+          var maxColor = parseInt(svgEl.getAttribute('data-xychart-colors') || '-1', 10);
+          if (maxColor >= 0) {
+            var accent = th.accent || CHART_ACCENT_FALLBACK;
+            svgEl.style.setProperty('--xychart-color-0', accent);
+            for (var ci = 1; ci <= maxColor; ci++) {
+              svgEl.style.setProperty('--xychart-color-' + ci, getSeriesColor(ci, accent, th.bg));
+            }
+          }
         }
       } else {
         originalSvgStyles.push('');
@@ -1737,6 +1759,15 @@ ${bundleJs}
           for (var k = 0; k < enrichment.length; k++) {
             if (th[enrichment[k]]) svgEl.style.setProperty('--' + enrichment[k], th[enrichment[k]]);
             else svgEl.style.removeProperty('--' + enrichment[k]);
+          }
+          // Recompute xychart series color vars
+          var maxColor = parseInt(svgEl.getAttribute('data-xychart-colors') || '-1', 10);
+          if (maxColor >= 0) {
+            var accent = th.accent || CHART_ACCENT_FALLBACK;
+            svgEl.style.setProperty('--xychart-color-0', accent);
+            for (var ci = 1; ci <= maxColor; ci++) {
+              svgEl.style.setProperty('--xychart-color-' + ci, getSeriesColor(ci, accent, th.bg));
+            }
           }
         }
       }

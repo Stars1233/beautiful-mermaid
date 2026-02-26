@@ -16,7 +16,7 @@ export interface Sample {
   source: string
   /** Optional category tag for grouping in the Table of Contents */
   category?: string
-  options?: { bg?: string; fg?: string; line?: string; accent?: string; muted?: string; surface?: string; border?: string; font?: string; padding?: number; transparent?: boolean }
+  options?: { bg?: string; fg?: string; line?: string; accent?: string; muted?: string; surface?: string; border?: string; font?: string; padding?: number; transparent?: boolean; interactive?: boolean }
 }
 
 export const samples: Sample[] = [
@@ -648,6 +648,32 @@ export const samples: Sample[] = [
   N-->>G: Queued
   Note over G: Aggregate response`,
   },
+  {
+    title: 'Sequence: Self-Messages with Notes',
+    category: 'Sequence',
+    description: 'Self-referencing messages inside alt blocks with notes — tests that notes clear self-message loops and stack without overlapping.',
+    source: `sequenceDiagram
+  participant User
+  participant Main as Main Process
+  participant Renderer
+  participant Timer as 3s Fallback Timer
+  User->>Main: CMD+W
+  Main->>Main: event.preventDefault()
+  Main->>Renderer: WINDOW_CLOSE_REQUESTED
+  Main->>Timer: Start 3s timer
+  alt Multiple panels
+    Renderer->>Renderer: closePanel(focusedId)
+    Note over Renderer: Panel removed
+    Note over Renderer: No confirmCloseWindow!
+    Timer-->>Main: 3s elapsed → window.destroy()
+  else Single panel
+    Renderer->>Renderer: closePanel(lastId)
+    Note over Renderer: Stack becomes []
+    Renderer->>Renderer: Auto-select fires → new panel created!
+    Note over Renderer: Panel reopens
+    Timer-->>Main: 3s elapsed → window.destroy()
+  end`,
+  },
 
   // ══════════════════════════════════════════════════════════════════════════
   //  CLASS DIAGRAMS — Core Features
@@ -1154,5 +1180,119 @@ export const samples: Sample[] = [
   TEACHER ||--o{ COURSE : teaches
   STUDENT ||--o{ ENROLLMENT : enrolled
   COURSE ||--o{ ENROLLMENT : has`,
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  //  XY CHARTS (xychart-beta)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    title: 'XY: Simple Bar Chart',
+    category: 'XY Chart',
+    description: 'Basic bar chart with categorical x-axis.',
+    source: `xychart-beta
+    title "Product Sales"
+    x-axis [Widgets, Gadgets, Gizmos, Doodads, Thingamajigs]
+    bar [150, 230, 180, 95, 310]`,
+    options: { interactive: true },
+  },
+  {
+    title: 'XY: Line Chart',
+    category: 'XY Chart',
+    description: 'Line chart showing revenue growth over years.',
+    source: `xychart-beta
+    title "Revenue Growth"
+    x-axis [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025]
+    line [320, 420, 540, 680, 820, 950, 1080, 1200]`,
+    options: { interactive: true },
+  },
+  {
+    title: 'XY: Bar and Line Overlay',
+    category: 'XY Chart',
+    description: 'Bars with a line overlay and both axis titles.',
+    source: `xychart-beta
+    title "Monthly Revenue"
+    x-axis "Month" [Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec]
+    y-axis "Revenue (USD)" 0 --> 10000
+    bar [4200, 5000, 5800, 6200, 5500, 7000, 7800, 7200, 8400, 8100, 9000, 9200]
+    line [4200, 5000, 5800, 6200, 5500, 7000, 7800, 7200, 8400, 8100, 9000, 9200]`,
+    options: { interactive: true },
+  },
+  {
+    title: 'XY: Horizontal Bars',
+    category: 'XY Chart',
+    description: 'Horizontal bar chart showing language popularity.',
+    source: `xychart-beta horizontal
+    title "Language Popularity"
+    x-axis [Python, JavaScript, Java, Go, Rust]
+    bar [30, 25, 20, 12, 8]`,
+    options: { interactive: true },
+  },
+  {
+    title: 'XY: Multiple Bar Series',
+    category: 'XY Chart',
+    description: 'Two bar series comparing years side by side.',
+    source: `xychart-beta
+    title "2023 vs 2024 Sales"
+    x-axis [Q1, Q2, Q3, Q4]
+    bar [200, 250, 300, 280]
+    bar [230, 280, 320, 350]`,
+    options: { interactive: true },
+  },
+  {
+    title: 'XY: Dual Lines',
+    category: 'XY Chart',
+    description: 'Two lines comparing planned vs actual values.',
+    source: `xychart-beta
+    title "Planned vs Actual"
+    x-axis [Jan, Feb, Mar, Apr, May, Jun, Jul, Aug]
+    line [100, 145, 190, 240, 280, 320, 360, 400]
+    line [90, 130, 185, 235, 275, 340, 380, 420]`,
+    options: { interactive: true },
+  },
+  {
+    title: 'XY: Numeric X-Axis',
+    category: 'XY Chart',
+    description: 'Line chart using a numeric x-axis range.',
+    source: `xychart-beta
+    title "Distribution Curve"
+    x-axis 0 --> 100
+    line [4, 7, 13, 21, 31, 43, 58, 71, 84, 91, 95, 91, 84, 71, 58, 43, 31, 21, 13, 7, 4]`,
+    options: { interactive: true },
+  },
+  {
+    title: 'XY: 12-Month Dataset',
+    category: 'XY Chart',
+    description: 'Full year monthly data with bar and trend line.',
+    source: `xychart-beta
+    title "Monthly Active Users (2024)"
+    x-axis [Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec]
+    y-axis "Users" 0 --> 30000
+    bar [12000, 13500, 15200, 16800, 18500, 20100, 19800, 21500, 23000, 24200, 25800, 28000]
+    line [12000, 13500, 15200, 16800, 18500, 20100, 19800, 21500, 23000, 24200, 25800, 28000]`,
+    options: { interactive: true },
+  },
+  {
+    title: 'XY: Horizontal Combined',
+    category: 'XY Chart',
+    description: 'Horizontal chart with both bars and a trend line.',
+    source: `xychart-beta horizontal
+    title "Budget vs Actual"
+    x-axis [Eng, Sales, Marketing, Product, Ops, HR, Finance, Legal]
+    bar [500, 350, 250, 200, 150, 120, 100, 80]
+    line [480, 380, 230, 180, 160, 110, 95, 75]`,
+    options: { interactive: true },
+  },
+  {
+    title: 'XY: Sprint Burndown',
+    category: 'XY Chart',
+    description: 'Sprint burndown chart with actual and ideal lines.',
+    source: `xychart-beta
+    title "Sprint Burndown"
+    x-axis [D1, D2, D3, D4, D5, D6, D7, D8, D9, D10]
+    y-axis "Story Points" 0 --> 80
+    line [72, 65, 58, 50, 45, 38, 30, 22, 12, 0]
+    line [72, 65, 58, 50, 43, 36, 29, 22, 14, 0]`,
+    options: { interactive: true },
   },
 ]
